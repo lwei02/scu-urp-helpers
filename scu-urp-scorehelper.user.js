@@ -6,7 +6,6 @@
 // @match        *://zhjw.scu.edu.cn/*
 // @match        *://202.115.47.141/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=scu.edu.cn
-// @require 	 http://userscripts-mirror.org/scripts/source/107941.user.js
 // @grant 		 GM_setValue
 // @grant 		 GM_getValue
 // ==/UserScript==
@@ -14,16 +13,16 @@
 (function () {
 	"use strict";
 
-    if(GM_SuperValue.get("moelweijs_warningShow", -1) === -1){ // 未设置过
-		GM_SuperValue.set("moelweijs_warningShow", 1);
+    if(GM_getValue("moelweijs_warningShow", -1) === -1){ // 未设置过
+		GM_setValue("moelweijs_warningShow", 1);
 	}
 
-	if(GM_SuperValue.get("moelweijs_forceDetailEntrance", -1) === -1){ // 未设置过
-		GM_SuperValue.set("moelweijs_forceDetailEntrance", 2);
+	if(GM_getValue("moelweijs_forceDetailEntrance", -1) === -1){ // 未设置过
+		GM_setValue("moelweijs_forceDetailEntrance", 2);
 	}
 
-	if(GM_SuperValue.get("moelweijs_detailEnableAll", -1) === -1){
-		GM_SuperValue.set("moelweijs_detailEnableAll", 2);
+	if(GM_getValue("moelweijs_detailEnableAll", -1) === -1){
+		GM_setValue("moelweijs_detailEnableAll", 2);
 	}
 
 	if (
@@ -105,7 +104,7 @@
 
 		let selector1 = $("#form-field-radio-1");
 		let selector2 = $("#form-field-radio-2");
-		if (GM_SuperValue.get("moelweijs_warningShow", 1) == 1) {
+		if (GM_getValue("moelweijs_warningShow", 1) == 1) {
 			selector1.prop("checked", true);
 			selector2.prop("checked", false);
 		} else {
@@ -115,16 +114,16 @@
 		
 		async function setWarningShow(){
 			if(selector1.prop("checked")){
-				await GM_SuperValue.set("moelweijs_warningShow", 1);
+				await GM_setValue("moelweijs_warningShow", 1);
 			}else{
-				await GM_SuperValue.set("moelweijs_warningShow", 2);
+				await GM_setValue("moelweijs_warningShow", 2);
 			}
 		}
 
 		let selector3 = $("#form-field-radio2-1");
 		let selector4 = $("#form-field-radio2-2");
 
-		if (GM_SuperValue.get("moelweijs_forceDetailEntrance", 2) == 2) {
+		if (GM_getValue("moelweijs_forceDetailEntrance", 2) == 2) {
 			selector3.prop("checked", false);
 			selector4.prop("checked", true);
 		} else {
@@ -134,16 +133,16 @@
 
 		async function setForceDetailEntrance(){
 			if(selector3.prop("checked")){
-				await GM_SuperValue.set("moelweijs_forceDetailEntrance", 1);
+				await GM_setValue("moelweijs_forceDetailEntrance", 1);
 			}else{
-				await GM_SuperValue.set("moelweijs_forceDetailEntrance", 2);
+				await GM_setValue("moelweijs_forceDetailEntrance", 2);
 			}
 		}
 
 		let selector5 = $("#form-field-radio3-1");
 		let selector6 = $("#form-field-radio3-2");
 
-		if (GM_SuperValue.get("moelweijs_detailEnableAll", 2) == 2) {
+		if (GM_getValue("moelweijs_detailEnableAll", 2) == 2) {
 			selector5.prop("checked", false);
 			selector6.prop("checked", true);
 		} else {
@@ -153,9 +152,9 @@
 
 		async function setDetailEnableAll(){
 			if(selector5.prop("checked")){
-				await GM_SuperValue.set("moelweijs_detailEnableAll", 1);
+				await GM_setValue("moelweijs_detailEnableAll", 1);
 			}else{
-				await GM_SuperValue.set("moelweijs_detailEnableAll", 2);
+				await GM_setValue("moelweijs_detailEnableAll", 2);
 			}
 		}
 	
@@ -337,7 +336,7 @@
 					"RW",
 					"http://zhjw.scu.edu.cn/student/integratedQuery/scoreQuery/thisTermScores/index?navjs=1"
 				);
-				if(GM_SuperValue.get("moelweijs_warningShow", 1) === 1){
+				if(GM_getValue("moelweijs_warningShow", 1) === 1){
 					layer.alert(
 						"该页面为URP系统存在但四川大学教务系统未前端显示的路由页面，其中内容可能被教务系统限制而不可用。另外由于URP系统本身限制，该页面仅在成绩登录开始至本学期结束有效，其余时间将不会返回有效内容。另请不要大肆传播该页面URL以防被教务处禁用。",
 						{
@@ -373,7 +372,7 @@
 
 			
 
-			if(GM_SuperValue.get("moelweijs_forceDetailEntrance", 2) === 1){
+			if(GM_getValue("moelweijs_forceDetailEntrance", 2) === 1){
 				$("#showScoreDetail").val("1");
 				$("#timeline-1 > div > div > div > div > table > thead > tr > th:nth-child(9)").after("<th>课程明细</th>");
 			}
@@ -393,7 +392,7 @@
 					"RW",
 					"http://zhjw.scu.edu.cn/student/integratedQuery/scoreQuery/subitemScore/index?navjs=1"
 				);
-				if(GM_SuperValue.get("moelweijs_warningShow", 1) === 1){
+				if(GM_getValue("moelweijs_warningShow", 1) === 1){
 					layer.alert(
 						"该页面为URP系统存在但四川大学教务系统未前端显示的路由页面，其中内容可能被教务系统限制而不可用。另外由于该页面未公开，请不要大肆传播这一页面的URL。",
 						{
@@ -442,7 +441,7 @@
 		window.location.pathname === "/student/integratedQuery/scoreQuery/coursePropertyScores/index" || // 课程属性成绩
 		window.location.pathname === "/student/integratedQuery/scoreQuery/schemeScores/index" || // 方案成绩
 		window.location.pathname === "/student/integratedQuery/scoreQuery/unpassedScores/index" ){ // 不及格成绩
-			if(GM_SuperValue.get("moelweijs_detailEnableAll", 2) === 1){
+			if(GM_getValue("moelweijs_detailEnableAll", 2) === 1){
 				$("#showScoreDetail").val("1");
 			}
 		}
