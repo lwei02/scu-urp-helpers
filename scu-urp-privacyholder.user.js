@@ -1,11 +1,15 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-隐私保护插件
-// @version      1.0
+// @version      1.0.2
 // @description  对头像、姓名等进行直接替换，便于截图
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
 // @match        *://202.115.47.141/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=scu.edu.cn
+// @require      https://cdn.jsdelivr.net/npm/gritter@1.7.4/js/jquery.gritter.min.js
+// @resource   IMPORTED_CSS https://cdn.jsdelivr.net/npm/gritter@1.7.4/css/jquery.gritter.min.css
+// @grant      GM_getResourceText
+// @grant      GM_addStyle
 // @grant 		 GM_setValue
 // @grant 		 GM_getValue
 // @grant 		 GM_log
@@ -13,6 +17,9 @@
 
 (function() {
     "use strict";
+
+    const my_css = GM_getResourceText("IMPORTED_CSS");
+    GM_addStyle(my_css);
 
     if(GM_getValue("moe_showFakeAlertTs", "undefinedundefined") == "undefinedundefined"){
         GM_setValue("moe_showFakeAlertTs", "0");
