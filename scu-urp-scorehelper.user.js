@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-成绩详情导航
-// @version      1.4.2
+// @version      1.4.3
 // @description  在全部学期成绩查询页面添加前往分项成绩和当前学期成绩明细的入口。
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
