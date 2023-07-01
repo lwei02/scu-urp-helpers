@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-隐私保护插件
-// @version      1.0.2
+// @version      1.1.0
 // @description  对头像、姓名等进行直接替换，便于截图
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -97,6 +97,7 @@
         }
         updateShowInfo();
     });
+    $target.children[0].href = "javascript:;" // 原始链接为#，点击后会跳转到页面顶部，改为javascript:;阻止跳转
 
     // 检查页面URL，如果是个人信息编辑页面，添加设置按钮
     if(window.location.pathname === "/student/rollManagement/personalInfoUpdate/index"){
