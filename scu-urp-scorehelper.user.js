@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-成绩详情导航
-// @version      1.5.1
+// @version      1.5.2
 // @description  在全部学期成绩查询页面添加前往分项成绩和当前学期成绩明细的入口。
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -223,7 +223,10 @@
 		window.location.pathname ===
 		"/student/integratedQuery/scoreQuery/thisTermScores/index"
 	) {
-		if(GM_getValue("moelweijs_thisTermExtension", 2) === 2){ // 扩展关闭，仅修复页面显示问题
+		let params = new URLSearchParams(window.location.search);
+		if(	GM_getValue("moelweijs_thisTermExtension", 2) === 2 ||
+		   	params.get("navjs") !== "1"
+		){ // 扩展关闭，仅修复页面显示问题
 			// fix broken page
 			if($("#timeline-1 > div > div > div > div > table > thead > tr > th:nth-child(6)").text().trim() !== "课程最高分"){
 				$("#timeline-1 > div > div > div > div > table > thead > tr > th:nth-child(5)").after("<th>课程最高分</th>");
@@ -530,7 +533,7 @@
 					}
 				</script>`);
 		}
-		let params = new URLSearchParams(window.location.search);
+		
 		if (params.get("navjs") === "1") {
 			if (params.get("initial") === "1") {
 				history.pushState(
