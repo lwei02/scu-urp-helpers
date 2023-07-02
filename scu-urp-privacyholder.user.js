@@ -1,13 +1,11 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-隐私保护插件
-// @version      2.0.1
+// @version      2.0.2
 // @description  对头像、姓名等进行直接替换，便于截图
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
 // @match        *://202.115.47.141/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=scu.edu.cn
-// @grant      GM_getResourceText
-// @grant      GM_addStyle
 // @grant 		 GM_setValue
 // @grant 		 GM_getValue
 // @grant 		 GM_log
@@ -24,10 +22,6 @@
         GM_setValue("moe_fakeName", "***");
     }
 
-    if(GM_getValue("moe_avatarGender", -1) == -1){ // 使用的头像性别
-        GM_setValue("moe_avatarGender", 1) // 1 for female and 2 for male
-    }
-
     if(GM_getValue("moe_alwaysFakeAvatar", -1) == -1){ // 插件关闭时是否仍然使用系统默认头像之一而不显示照片
         GM_setValue("moe_alwaysFakeAvatar", 0);
     }
@@ -39,6 +33,10 @@
     var name = $(".user-info")[0].innerText.split("\n")[1].trim();
     var avatar = $(".nav-user-photo")[0].src;
     var gender = $(".nav-user-photo")[0].onerror.toString().split("head/")[1].split(".png")[0] == "man" ? 2 : 1
+
+    if(GM_getValue("moe_avatarGender", -1) == -1){ // 使用的头像性别
+        GM_setValue("moe_avatarGender", gender) // 1 for female and 2 for male
+    }
 
     function showFakeInfo(){
         $(".user-info")[0].innerText = $(".user-info")[0].innerText.replace($(".user-info")[0].innerText.split("\n")[1].trim(), GM_getValue("moe_fakeName", "[REDACTED]"));
