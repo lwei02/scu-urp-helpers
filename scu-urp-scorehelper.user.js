@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-成绩详情导航
-// @version      1.5.2
+// @version      1.5.4
 // @description  在全部学期成绩查询页面添加前往分项成绩和当前学期成绩明细的入口。
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -500,8 +500,15 @@
 							// tContent += "<td >" + v.englishCourseName + "</td>";
 							if (v.inputStatusCode == "05") {
 								tContent += "<td >" + v.levelName + "(" + v.gradePoint + ")" + "</td>";
-							} else {
-								tContent += "<td ></td>";
+							} else if (v.inputStatusCode == "03") { // 暂存成绩会提供等级，也显示出来
+								// 利用页面中存在的隐藏选择器，获取等级对应的绩点和名称
+								$("#djcj_complete").val(v.levlePoint); // the typo is from URP endpoint
+								$("#bfcj_complete").val(v.levlePoint);
+								var levelName = $("#djcj_complete")[0].options[$("#djcj_complete")[0].selectedIndex].text
+								var GPAPoint = $("#bfcj_complete")[0].options[$("#bfcj_complete")[0].selectedIndex].attributes["jds"].value
+								tContent += "<td style=\\"color: rgb(128,128,128) !important; text-decoration: underline dotted rgb(255,192,192); text-underline-offset: 0.325rem;\\" title=\\"该等级为老师暂存，仅供参考，请以老师公布成绩为准\\">" + levelName + "(" + GPAPoint + ")" + "</td>";
+							} else { // 其他情况不显示等级
+								tContent += "<td > </td>";
 							}
 							tContent += "<td >" + v.inputStatusExplain + "</td>";
 							if(v.operatetime.length == 14){
