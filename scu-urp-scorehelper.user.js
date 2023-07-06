@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-成绩详情导航
-// @version      1.5.4
+// @version      1.5.5
 // @description  在全部学期成绩查询页面添加前往分项成绩和当前学期成绩明细的入口。
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -385,6 +385,36 @@
 
 			// fix the broken fill-in function
 			$("#btn-scroll-up").after(`<script>
+					async function queryOperatorName(element){
+						urp.alert("正在查询……");
+						var operatorId = $(element).text();
+						var curTeachingTermNum = $(".light-red").text().trim().split(" ")[0] + "-" + ($(".light-red").text().trim().split(" ")[1] === "春" ? "2" : "1") + "-1";
+
+						var operatorName = ""; // 用于存储操作人姓名
+						let url = "/student/teachingResources/teacherCurriculum/searchCurriculumInfo/callback?planCode=" + curTeachingTermNum + "&teacherNum=" + operatorId;
+						await $.ajax({
+							url: url,
+							type: "GET",
+							dataType: "json",
+							success: function (data) {
+								if(data[0].length > 0){
+									operatorName = data[0][0]["jsm"]
+								}
+							}
+						});
+
+						if (operatorName === "") {
+							urp.alert("无法查询到操作人姓名，可能是因为该教师未在本学期开课，或是操作者不是教师。");
+						} else {
+							$(element).text(operatorName + "(" + operatorId + ")");
+							urp.alert("查询成功！");
+						}
+						$(element).removeAttr("onclick");
+						$(element).removeAttr("style");
+
+					}
+
+
 					function fillScoreTable(d) { // override the original function
 						var tContent = "";
 						var param = $("#param").val();
@@ -516,7 +546,7 @@
 							}else{
 								tContent += "<td >" + v.operatetime + "</td>";
 							}
-							tContent += "<td >" + v.operator + "</td>";
+							tContent += "<td ><span style=\\"cursor: pointer; text-decoration: underline; color:#428bca\\" onclick=\\"queryOperatorName(this)\\" title='查询操作者姓名'>" + v.operator + "</span></td>";
 
 							tContent += "</tr>";
 
