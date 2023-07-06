@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-成绩详情导航
-// @version      1.5.5
+// @version      1.5.6
 // @description  在全部学期成绩查询页面添加前往分项成绩和当前学期成绩明细的入口。
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -27,6 +27,10 @@
 
 	if(GM_getValue("moelweijs_thisTermExtension", -1) === -1){
 		GM_setValue("moelweijs_thisTermExtension", 2);
+	}
+
+	if(GM_getValue("moelweijs_thisTermExtensionQueryTeacherName", -1) === -1){
+		GM_setValue("moelweijs_thisTermExtensionQueryTeacherName", 2);
 	}
 
 	if (
@@ -103,6 +107,16 @@
 									<span class="lbl"> 是 </span>
 									&nbsp;&nbsp;&nbsp;&nbsp;
 									<input type="radio" name="form-field-radio4" value="false" class="ace" id="form-field-radio4-2">
+									<span class="lbl"> 否 </span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-6 control-label no-padding-right" for="form-field-5"> 扩展本学期成绩查询后进一步查询教师姓名 </label>
+								<div class="col-sm-6">
+									<input type="radio" name="form-field-radio5" value="true" class="ace" id="form-field-radio5-1">
+									<span class="lbl"> 是 </span>
+									&nbsp;&nbsp;&nbsp;&nbsp;
+									<input type="radio" name="form-field-radio5" value="false" class="ace" id="form-field-radio5-2">
 									<span class="lbl"> 否 </span>
 								</div>
 							</div>
@@ -190,6 +204,25 @@
 				await GM_setValue("moelweijs_thisTermExtension", 2);
 			}
 		}
+
+		let selector9 = $("#form-field-radio5-1");
+		let selector10 = $("#form-field-radio5-2");
+
+		if (GM_getValue("moelweijs_thisTermExtensionQueryTeacherName", 2) == 2) {
+			selector9.prop("checked", false);
+			selector10.prop("checked", true);
+		} else {
+			selector9.prop("checked", true);
+			selector10.prop("checked", false);
+		}
+
+		async function setThisTermExtensionQueryTeacherName(){
+			if(selector9.prop("checked")){
+				await GM_setValue("moelweijs_thisTermExtensionQueryTeacherName", 1);
+			}else{
+				await GM_setValue("moelweijs_thisTermExtensionQueryTeacherName", 2);
+			}
+		}
 	
 
 		selector1.change(function(){
@@ -215,6 +248,12 @@
 		});
 		selector8.change(function(){
 			setThisTermExtension();
+		});
+		selector9.change(function(){
+			setThisTermExtensionQueryTeacherName();
+		});
+		selector10.change(function(){
+			setThisTermExtensionQueryTeacherName();
 		});
         
 	}
@@ -383,192 +422,358 @@
 			$("#timeline-1 > div > div > div > div > table > thead > tr > th:nth-child(15)").after("<th>操作人</th>");
 			$("#timeline-1 > div > div > div > div > table > thead > tr > th:nth-child(12)").remove(); // 移除原有英文课程名，没有意义
 
-			// fix the broken fill-in function
-			$("#btn-scroll-up").after(`<script>
-					async function queryOperatorName(element){
-						urp.alert("正在查询……");
-						var operatorId = $(element).text();
-						var curTeachingTermNum = $(".light-red").text().trim().split(" ")[0] + "-" + ($(".light-red").text().trim().split(" ")[1] === "春" ? "2" : "1") + "-1";
-
-						var operatorName = ""; // 用于存储操作人姓名
-						let url = "/student/teachingResources/teacherCurriculum/searchCurriculumInfo/callback?planCode=" + curTeachingTermNum + "&teacherNum=" + operatorId;
-						await $.ajax({
-							url: url,
-							type: "GET",
-							dataType: "json",
-							success: function (data) {
-								if(data[0].length > 0){
-									operatorName = data[0][0]["jsm"]
-								}
-							}
-						});
-
-						if (operatorName === "") {
-							urp.alert("无法查询到操作人姓名，可能是因为该教师未在本学期开课，或是操作者不是教师。");
-						} else {
-							$(element).text(operatorName + "(" + operatorId + ")");
-							urp.alert("查询成功！");
-						}
-						$(element).removeAttr("onclick");
-						$(element).removeAttr("style");
-
-					}
+			if(GM_getValue("moelweijs_thisTermExtensionQueryTeacherName", 2) === 1){ // 添加教师姓名
 
 
-					function fillScoreTable(d) { // override the original function
-						var tContent = "";
-						var param = $("#param").val();
-						var schoolName = $("#schoolName").val();
-						var showScoreDetail = $("#showScoreDetail").val();
-						if (showScoreDetail != "0") {
-							$("#mx").show();
-						} else {
-							$("#mx").hide();
-						}
-						var cnt=0;
-						$.each(d, function (i, v) {
-							tContent += "<tr>";
-							tContent += "<td >" + v.id.courseNumber + "</td>";
-							tContent += "<td >" + (v.coureSequenceNumber == null ? "" : (v.coureSequenceNumber == 'NONE' ? "" : v.coureSequenceNumber)) + "</td>";
-							tContent += "<td >" + v.courseName + "</td>";
-							tContent += "<td >" + v.credit + "</td>";
-							tContent += "<td >" + v.coursePropertyName + "</td>";
-							if (schoolName == "100049"&&"未评估"==v.courseScore) {
-								cnt++;
-							}
-							if (v.inputStatusCode == "05") {
-								if (1) {
-									if (1) {
-										tContent += "<td >" + v.maxcj + "</td>";
-										tContent += "<td >" + v.mincj + "</td>";
+				// fix the broken fill-in function
+				$("#btn-scroll-up").after(`<script>
+						async function queryOperatorName(element){
+							//urp.alert("正在查询……");
+							var operatorId = $(element).text();
+							var curTeachingTermNum = $(".light-red").text().trim().split(" ")[0] + "-" + ($(".light-red").text().trim().split(" ")[1] === "春" ? "2" : "1") + "-1";
+
+							var operatorName = ""; // 用于存储操作人姓名
+							let url = "/student/teachingResources/teacherCurriculum/searchCurriculumInfo/callback?planCode=" + curTeachingTermNum + "&teacherNum=" + operatorId;
+							await $.ajax({
+								url: url,
+								type: "GET",
+								dataType: "json",
+								success: function (data) {
+									if(data[0].length > 0){
+										operatorName = data[0][0]["jsm"]
 									}
-									tContent += "<td >" + v.avgcj + "</td>";
 								}
+							});
+
+							if (operatorName === "") {
+								//urp.alert("无法查询到操作人姓名，可能是因为该教师未在本学期开课，或是操作者不是教师。");
+							} else {
+								$(element).text(operatorName + "(" + operatorId + ")");
+								//urp.alert("查询成功！");
+							}
+							$(element).removeAttr("onclick");
+
+						}
+
+
+						async function fillScoreTable(d) { // override the original function
+							await (function (){
+								var tContent = "";
+								var param = $("#param").val();
+								var schoolName = $("#schoolName").val();
+								var showScoreDetail = $("#showScoreDetail").val();
 								if (showScoreDetail != "0") {
-									if (schoolName == "100010") {
-										if (v.courseNumber == "58000001" || v.courseNumber == "58000002" || v.courseNumber == "58000003" || v.courseNumber == "58000004" || v.courseNumber == "58000005") {
-											tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.courseScore + "</a></td>";
-										} else {
-											tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.levelName + "</a></td>";
+									$("#mx").show();
+								} else {
+									$("#mx").hide();
+								}
+								var cnt=0;
+								$.each(d, function (i, v) {
+									tContent += "<tr>";
+									tContent += "<td >" + v.id.courseNumber + "</td>";
+									tContent += "<td >" + (v.coureSequenceNumber == null ? "" : (v.coureSequenceNumber == 'NONE' ? "" : v.coureSequenceNumber)) + "</td>";
+									tContent += "<td >" + v.courseName + "</td>";
+									tContent += "<td >" + v.credit + "</td>";
+									tContent += "<td >" + v.coursePropertyName + "</td>";
+									if (schoolName == "100049"&&"未评估"==v.courseScore) {
+										cnt++;
+									}
+									if (v.inputStatusCode == "05") {
+										if (1) {
+											if (1) {
+												tContent += "<td >" + v.maxcj + "</td>";
+												tContent += "<td >" + v.mincj + "</td>";
+											}
+											tContent += "<td >" + v.avgcj + "</td>";
 										}
-									} else {
-
-										if (schoolName == "100049") {
-											/*if (v.inputMethodCode == "002") {
-											if("未评估"==v.levelName){
-											tContent += "<td >" + v.levelName + "</td>";
-											}else{
-											tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.levelName + "</a></td>";
-											}
+										if (showScoreDetail != "0") {
+											if (schoolName == "100010") {
+												if (v.courseNumber == "58000001" || v.courseNumber == "58000002" || v.courseNumber == "58000003" || v.courseNumber == "58000004" || v.courseNumber == "58000005") {
+													tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.courseScore + "</a></td>";
+												} else {
+													tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.levelName + "</a></td>";
+												}
 											} else {
-											if("未评估"==v.courseScore){
-											tContent += "<td>" + v.courseScore + "</td>";
-											}else{
-											tContent += "<td><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.courseScore + "</a></td>";
+
+												if (schoolName == "100049") {
+													/*if (v.inputMethodCode == "002") {
+													if("未评估"==v.levelName){
+													tContent += "<td >" + v.levelName + "</td>";
+													}else{
+													tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.levelName + "</a></td>";
+													}
+													} else {
+													if("未评估"==v.courseScore){
+													tContent += "<td>" + v.courseScore + "</td>";
+													}else{
+													tContent += "<td><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.courseScore + "</a></td>";
+													}
+
+													}*/
+													tContent += "<td >" + (v.inputMethodCode == "002" ? v.levelName : v.courseScore) + "</td>";
+												} else {
+													if (v.inputMethodCode == "002") {
+														tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.levelName + "</a></td>";
+													} else {
+														tContent += "<td><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.courseScore + "</a></td>";
+													}
+												}
+
 											}
 
-											}*/
-											tContent += "<td >" + (v.inputMethodCode == "002" ? v.levelName : v.courseScore) + "</td>";
+
+											if (schoolName == "100049") {
+												/*if("未评估"==v.courseScore || "未评估"==v.levelName ){
+												tContent += "未评估</td>";
+												}else{
+												tContent += "<button class='btn btn-info btn-round btn-xs'  id='gritter-sticky-" + i + "'>";
+												tContent += "<i class='ace-icon fa fa-eye bigger-120'></i>查看</button></td>";
+												}*/
+											} else {
+												tContent += "<td >";
+												tContent += "<button class='btn btn-info btn-round btn-xs'  id='gritter-sticky-" + i + "'>";
+												tContent += "<i class='ace-icon fa fa-eye bigger-120'></i>查看</button></td>";
+											}
 										} else {
 											if (v.inputMethodCode == "002") {
-												tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.levelName + "</a></td>";
+												tContent += "<td>" + v.levelName + "</td>";
 											} else {
-												tContent += "<td><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.courseScore + "</a></td>";
+												tContent += "<td>" + v.courseScore + "</td>";
 											}
 										}
-
+										if (1) {
+											tContent += "<td >" + v.rank + "</td>";
+										}
+										tContent += "<td >" + v.unpassedReasonExplain + "</td>";
+									}else {
+										if (showScoreDetail != "0") {
+											if (schoolName == "100010") {
+												tContent += "<td ></td><td ></td><td ></td>";
+											} else if (schoolName == "100049") {
+												tContent += "<td>" + v.avgcj + "</td>" +
+														"<td>" + v.levelName + "</td><td >" + v.rank + "</td><td ></td>";
+											} else {
+												tContent += "<td ></td><td ></td><td ></td>" +
+														"<td ></td><td ></td><td ></td><td ></td>";
+											}
+										} else {
+											if (schoolName == "100010") {
+												tContent += "<td ></td><td ></td>";
+											} else if (schoolName == "100049") {
+												tContent += "<td>" + v.avgcj + "</td>" +
+														"<td>" + v.levelName + "</td><td >" + v.rank + "</td><td ></td>";
+											} else {
+												tContent += "<td ></td><td ></td><td ></td>" +
+														"<td ></td><td ></td><td ></td>";
+											}
+										}
 									}
 
-
-									if (schoolName == "100049") {
-										/*if("未评估"==v.courseScore || "未评估"==v.levelName ){
-										tContent += "未评估</td>";
-										}else{
-										tContent += "<button class='btn btn-info btn-round btn-xs'  id='gritter-sticky-" + i + "'>";
-										tContent += "<i class='ace-icon fa fa-eye bigger-120'></i>查看</button></td>";
-										}*/
-									} else {
-										tContent += "<td >";
-										tContent += "<button class='btn btn-info btn-round btn-xs'  id='gritter-sticky-" + i + "'>";
-										tContent += "<i class='ace-icon fa fa-eye bigger-120'></i>查看</button></td>";
+									// tContent += "<td >" + v.englishCourseName + "</td>";
+									if (v.inputStatusCode == "05") {
+										tContent += "<td >" + v.levelName + "(" + v.gradePoint + ")" + "</td>";
+									} else if (v.inputStatusCode == "03") { // 暂存成绩会提供等级，也显示出来
+										// 利用页面中存在的隐藏选择器，获取等级对应的绩点和名称
+										$("#djcj_complete").val(v.levlePoint); // the typo is from URP endpoint
+										$("#bfcj_complete").val(v.levlePoint);
+										var levelName = $("#djcj_complete")[0].options[$("#djcj_complete")[0].selectedIndex].text
+										var GPAPoint = $("#bfcj_complete")[0].options[$("#bfcj_complete")[0].selectedIndex].attributes["jds"].value
+										tContent += "<td style=\\"color: rgb(128,128,128) !important; text-decoration: underline dotted rgb(255,192,192); text-underline-offset: 0.325rem;\\" title=\\"该等级为老师暂存，仅供参考，请以老师公布成绩为准\\">" + levelName + "(" + GPAPoint + ")" + "</td>";
+									} else { // 其他情况不显示等级
+										tContent += "<td > </td>";
 									}
-								} else {
-									if (v.inputMethodCode == "002") {
-										tContent += "<td>" + v.levelName + "</td>";
+									tContent += "<td >" + v.inputStatusExplain + "</td>";
+									if(v.operatetime.length == 14){
+										tContent += "<td >" + v.operatetime.substring(0,4)+"-"+v.operatetime.substring(4,6)+"-"+v.operatetime.substring(6,8)+" "+v.operatetime.substring(8,10)+":"+v.operatetime.substring(10,12)+":"+v.operatetime.substring(12,14) + "</td>";
+									}else{
+										tContent += "<td >" + v.operatetime + "</td>";
+									}
+									tContent += "<td ><span name=\\"queryTeacherNames\\" onclick=\\"queryOperatorName(this)\\">" + v.operator + "</span></td>";
+
+									tContent += "</tr>";
+
+									
+								});
+								$("#scoretbody").html(tContent);
+								
+								if(cnt>0){
+									$("#msg_div").html("<font style='color:red;'>请登录学习通APP完成课程评教（登录学习通后点击右上角输入邀请码“km55553”，再点击“评价问卷”进入评价页面）。完成评教后需等数据更新方可查询成绩，更新时间为每日中午12点和晚上0点。</font>");
+								}
+
+								for (var i = 0; i < d.length; i++) {
+									$("#gritter-sticky-" + i).on(ace.click_event, {
+										zxjxjhh: d[i].id.executiveEducationPlanNumber,
+										kch: d[i].id.courseNumber,
+										kssj: d[i].id.examtime,
+										kxh: d[i].coureSequenceNumber,
+										kcm: d[i].courseName
+									}, search);
+								}
+							})();
+							var queryTeacherNames = document.getElementsByName("queryTeacherNames");
+							// 点击上述元素，查询操作者姓名
+							for(var i = 0; i < queryTeacherNames.length; i++){
+								queryTeacherNames[i].click();
+							}
+						}
+					</script>`);
+			}else{
+				$("#btn-scroll-up").after(`<script>
+						function fillScoreTable(d) { // override the original function
+							var tContent = "";
+							var param = $("#param").val();
+							var schoolName = $("#schoolName").val();
+							var showScoreDetail = $("#showScoreDetail").val();
+							if (showScoreDetail != "0") {
+								$("#mx").show();
+							} else {
+								$("#mx").hide();
+							}
+							var cnt=0;
+							$.each(d, function (i, v) {
+								tContent += "<tr>";
+								tContent += "<td >" + v.id.courseNumber + "</td>";
+								tContent += "<td >" + (v.coureSequenceNumber == null ? "" : (v.coureSequenceNumber == 'NONE' ? "" : v.coureSequenceNumber)) + "</td>";
+								tContent += "<td >" + v.courseName + "</td>";
+								tContent += "<td >" + v.credit + "</td>";
+								tContent += "<td >" + v.coursePropertyName + "</td>";
+								if (schoolName == "100049"&&"未评估"==v.courseScore) {
+									cnt++;
+								}
+								if (v.inputStatusCode == "05") {
+									if (1) {
+										if (1) {
+											tContent += "<td >" + v.maxcj + "</td>";
+											tContent += "<td >" + v.mincj + "</td>";
+										}
+										tContent += "<td >" + v.avgcj + "</td>";
+									}
+									if (showScoreDetail != "0") {
+										if (schoolName == "100010") {
+											if (v.courseNumber == "58000001" || v.courseNumber == "58000002" || v.courseNumber == "58000003" || v.courseNumber == "58000004" || v.courseNumber == "58000005") {
+												tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.courseScore + "</a></td>";
+											} else {
+												tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.levelName + "</a></td>";
+											}
+										} else {
+
+											if (schoolName == "100049") {
+												/*if (v.inputMethodCode == "002") {
+												if("未评估"==v.levelName){
+												tContent += "<td >" + v.levelName + "</td>";
+												}else{
+												tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.levelName + "</a></td>";
+												}
+												} else {
+												if("未评估"==v.courseScore){
+												tContent += "<td>" + v.courseScore + "</td>";
+												}else{
+												tContent += "<td><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.courseScore + "</a></td>";
+												}
+
+												}*/
+												tContent += "<td >" + (v.inputMethodCode == "002" ? v.levelName : v.courseScore) + "</td>";
+											} else {
+												if (v.inputMethodCode == "002") {
+													tContent += "<td ><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.levelName + "</a></td>";
+												} else {
+													tContent += "<td><a style='cursor: pointer;text-decoration: underline;' title='" + (param == "1" ? "查看分项成绩" : "查看明细成绩") + "' onclick='lookSubitemScore(\\"" + v.id.executiveEducationPlanNumber + "\\",\\"" + v.id.courseNumber + "\\",\\"" + v.coureSequenceNumber + "\\",\\"" + v.id.examtime + "\\",\\"" + v.coursePropertyCode + "\\")'>" + v.courseScore + "</a></td>";
+												}
+											}
+
+										}
+
+
+										if (schoolName == "100049") {
+											/*if("未评估"==v.courseScore || "未评估"==v.levelName ){
+											tContent += "未评估</td>";
+											}else{
+											tContent += "<button class='btn btn-info btn-round btn-xs'  id='gritter-sticky-" + i + "'>";
+											tContent += "<i class='ace-icon fa fa-eye bigger-120'></i>查看</button></td>";
+											}*/
+										} else {
+											tContent += "<td >";
+											tContent += "<button class='btn btn-info btn-round btn-xs'  id='gritter-sticky-" + i + "'>";
+											tContent += "<i class='ace-icon fa fa-eye bigger-120'></i>查看</button></td>";
+										}
 									} else {
-										tContent += "<td>" + v.courseScore + "</td>";
+										if (v.inputMethodCode == "002") {
+											tContent += "<td>" + v.levelName + "</td>";
+										} else {
+											tContent += "<td>" + v.courseScore + "</td>";
+										}
+									}
+									if (1) {
+										tContent += "<td >" + v.rank + "</td>";
+									}
+									tContent += "<td >" + v.unpassedReasonExplain + "</td>";
+								}else {
+									if (showScoreDetail != "0") {
+										if (schoolName == "100010") {
+											tContent += "<td ></td><td ></td><td ></td>";
+										} else if (schoolName == "100049") {
+											tContent += "<td>" + v.avgcj + "</td>" +
+													"<td>" + v.levelName + "</td><td >" + v.rank + "</td><td ></td>";
+										} else {
+											tContent += "<td ></td><td ></td><td ></td>" +
+													"<td ></td><td ></td><td ></td><td ></td>";
+										}
+									} else {
+										if (schoolName == "100010") {
+											tContent += "<td ></td><td ></td>";
+										} else if (schoolName == "100049") {
+											tContent += "<td>" + v.avgcj + "</td>" +
+													"<td>" + v.levelName + "</td><td >" + v.rank + "</td><td ></td>";
+										} else {
+											tContent += "<td ></td><td ></td><td ></td>" +
+													"<td ></td><td ></td><td ></td>";
+										}
 									}
 								}
-								if (1) {
-									tContent += "<td >" + v.rank + "</td>";
+
+								// tContent += "<td >" + v.englishCourseName + "</td>";
+								if (v.inputStatusCode == "05") {
+									tContent += "<td >" + v.levelName + "(" + v.gradePoint + ")" + "</td>";
+								} else if (v.inputStatusCode == "03") { // 暂存成绩会提供等级，也显示出来
+									// 利用页面中存在的隐藏选择器，获取等级对应的绩点和名称
+									$("#djcj_complete").val(v.levlePoint); // the typo is from URP endpoint
+									$("#bfcj_complete").val(v.levlePoint);
+									var levelName = $("#djcj_complete")[0].options[$("#djcj_complete")[0].selectedIndex].text
+									var GPAPoint = $("#bfcj_complete")[0].options[$("#bfcj_complete")[0].selectedIndex].attributes["jds"].value
+									tContent += "<td style=\\"color: rgb(128,128,128) !important; text-decoration: underline dotted rgb(255,192,192); text-underline-offset: 0.325rem;\\" title=\\"该等级为老师暂存，仅供参考，请以老师公布成绩为准\\">" + levelName + "(" + GPAPoint + ")" + "</td>";
+								} else { // 其他情况不显示等级
+									tContent += "<td > </td>";
 								}
-								tContent += "<td >" + v.unpassedReasonExplain + "</td>";
-							}else {
-								if (showScoreDetail != "0") {
-									if (schoolName == "100010") {
-										tContent += "<td ></td><td ></td><td ></td>";
-									} else if (schoolName == "100049") {
-										tContent += "<td>" + v.avgcj + "</td>" +
-												"<td>" + v.levelName + "</td><td >" + v.rank + "</td><td ></td>";
-									} else {
-										tContent += "<td ></td><td ></td><td ></td>" +
-												"<td ></td><td ></td><td ></td><td ></td>";
-									}
-								} else {
-									if (schoolName == "100010") {
-										tContent += "<td ></td><td ></td>";
-									} else if (schoolName == "100049") {
-										tContent += "<td>" + v.avgcj + "</td>" +
-												"<td>" + v.levelName + "</td><td >" + v.rank + "</td><td ></td>";
-									} else {
-										tContent += "<td ></td><td ></td><td ></td>" +
-												"<td ></td><td ></td><td ></td>";
-									}
+								tContent += "<td >" + v.inputStatusExplain + "</td>";
+								if(v.operatetime.length == 14){
+									tContent += "<td >" + v.operatetime.substring(0,4)+"-"+v.operatetime.substring(4,6)+"-"+v.operatetime.substring(6,8)+" "+v.operatetime.substring(8,10)+":"+v.operatetime.substring(10,12)+":"+v.operatetime.substring(12,14) + "</td>";
+								}else{
+									tContent += "<td >" + v.operatetime + "</td>";
 								}
-							}
+								tContent += "<td >" + v.operator + "</td>";
 
-							// tContent += "<td >" + v.englishCourseName + "</td>";
-							if (v.inputStatusCode == "05") {
-								tContent += "<td >" + v.levelName + "(" + v.gradePoint + ")" + "</td>";
-							} else if (v.inputStatusCode == "03") { // 暂存成绩会提供等级，也显示出来
-								// 利用页面中存在的隐藏选择器，获取等级对应的绩点和名称
-								$("#djcj_complete").val(v.levlePoint); // the typo is from URP endpoint
-								$("#bfcj_complete").val(v.levlePoint);
-								var levelName = $("#djcj_complete")[0].options[$("#djcj_complete")[0].selectedIndex].text
-								var GPAPoint = $("#bfcj_complete")[0].options[$("#bfcj_complete")[0].selectedIndex].attributes["jds"].value
-								tContent += "<td style=\\"color: rgb(128,128,128) !important; text-decoration: underline dotted rgb(255,192,192); text-underline-offset: 0.325rem;\\" title=\\"该等级为老师暂存，仅供参考，请以老师公布成绩为准\\">" + levelName + "(" + GPAPoint + ")" + "</td>";
-							} else { // 其他情况不显示等级
-								tContent += "<td > </td>";
-							}
-							tContent += "<td >" + v.inputStatusExplain + "</td>";
-							if(v.operatetime.length == 14){
-								tContent += "<td >" + v.operatetime.substring(0,4)+"-"+v.operatetime.substring(4,6)+"-"+v.operatetime.substring(6,8)+" "+v.operatetime.substring(8,10)+":"+v.operatetime.substring(10,12)+":"+v.operatetime.substring(12,14) + "</td>";
-							}else{
-								tContent += "<td >" + v.operatetime + "</td>";
-							}
-							tContent += "<td ><span style=\\"cursor: pointer; text-decoration: underline; color:#428bca\\" onclick=\\"queryOperatorName(this)\\" title='查询操作者姓名'>" + v.operator + "</span></td>";
+								tContent += "</tr>";
 
-							tContent += "</tr>";
-
+								
+							});
+							$("#scoretbody").html(tContent);
 							
-						});
-						$("#scoretbody").html(tContent);
-						
-						if(cnt>0){
-							$("#msg_div").html("<font style='color:red;'>请登录学习通APP完成课程评教（登录学习通后点击右上角输入邀请码“km55553”，再点击“评价问卷”进入评价页面）。完成评教后需等数据更新方可查询成绩，更新时间为每日中午12点和晚上0点。</font>");
-						}
+							if(cnt>0){
+								$("#msg_div").html("<font style='color:red;'>请登录学习通APP完成课程评教（登录学习通后点击右上角输入邀请码“km55553”，再点击“评价问卷”进入评价页面）。完成评教后需等数据更新方可查询成绩，更新时间为每日中午12点和晚上0点。</font>");
+							}
 
-						for (var i = 0; i < d.length; i++) {
-							$("#gritter-sticky-" + i).on(ace.click_event, {
-								zxjxjhh: d[i].id.executiveEducationPlanNumber,
-								kch: d[i].id.courseNumber,
-								kssj: d[i].id.examtime,
-								kxh: d[i].coureSequenceNumber,
-								kcm: d[i].courseName
-							}, search);
+							for (var i = 0; i < d.length; i++) {
+								$("#gritter-sticky-" + i).on(ace.click_event, {
+									zxjxjhh: d[i].id.executiveEducationPlanNumber,
+									kch: d[i].id.courseNumber,
+									kssj: d[i].id.examtime,
+									kxh: d[i].coureSequenceNumber,
+									kcm: d[i].courseName
+								}, search);
+							}
 						}
-					}
-				</script>`);
+					</script>`);
+			}
 		}
 		
 		if (params.get("navjs") === "1") {
