@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-教学评估结果查询
-// @version      1.0.1
+// @version      1.0.2
 // @description  查询当前课程所有教师获得的全部评分
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -29,7 +29,7 @@ async function changePromised() {
                 let ktid = btns[i].attributes['onclick'].value.split("evaluation3(\"")[1].split("\",\"")[0];
                 // add another btn
                 let newBtn = document.createElement('button');
-                newBtn.innerText = '查看教师评分';
+                newBtn.innerText = '查看他人评分';
                 newBtn.className = 'btn btn-xs btn-round btn-warning';
                 newBtn.style = 'margin-left: 5px;';
                 newBtn.setAttribute('onclick', `moeViewScore('${ktid}')`);
@@ -40,7 +40,7 @@ async function changePromised() {
                 let ktid = btns[i].attributes['onclick'].value.split("evaluationResult2(\"")[1].split("\",\"")[0];
                 // add another btn
                 let newBtn = document.createElement('button');
-                newBtn.innerText = '查看教师评分';
+                newBtn.innerText = '查看他人评分';
                 newBtn.className = 'btn btn-xs btn-round btn-warning';
                 newBtn.style = 'margin-left: 5px;';
                 newBtn.setAttribute('onclick', `moeViewScore('${ktid}')`);
