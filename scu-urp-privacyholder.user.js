@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-隐私保护插件
-// @version      3.0.1
+// @version      3.0.2
 // @description  对头像、姓名等进行直接替换，便于截图
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -66,7 +66,7 @@
             name = GM_getValue("p0_name");
             if(GM_getValue("p0_avatarMode") == 0){
                 // 不隐藏头像
-                avatarSrc = $('.nav-user-photo').attr('src');
+                avatarSrc = "/main/queryStudent/img"
             } else if(GM_getValue("p0_avatarMode") == 1){
                 // 默认头像
                 avatarSrc = (GM_getValue("p0_defAvtGender") == 0) ? "/img/head/man.png" : "/img/head/woman.png";
