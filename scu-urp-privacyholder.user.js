@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-隐私保护插件
-// @version      3.0.0
+// @version      3.0.1
 // @description  对头像、姓名等进行直接替换，便于截图
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -205,6 +205,7 @@
                 // 更新
                 updateShow();
                 // 关闭
+                layer.msg('配置已保存', {icon: 1});
                 layer.close(index);
             },
             btn2: function(index, layero){
