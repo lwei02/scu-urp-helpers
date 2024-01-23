@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-字体替换
-// @version      1.0.0
+// @version      1.0.1
 // @description  让教务系统的字体样式更好看一些
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -53,6 +53,9 @@
     }
     h5 {
         font-family: "DIM", "HYQiHei" !important;
+    }
+    input{
+        font-family: "DIM", "HYQiHei";
     }
     `;
     document.getElementsByTagName('head')[0].appendChild(styleTg);
