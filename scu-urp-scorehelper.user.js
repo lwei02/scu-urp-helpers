@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-成绩详情导航
-// @version      1.5.8.1
+// @version      1.6.0
 // @description  在全部学期成绩查询页面添加前往分项成绩和当前学期成绩明细的入口。
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -595,8 +595,7 @@
 									// tContent += "<td >" + v.englishCourseName + "</td>";
 									if (v.inputStatusCode == "05") {
 										tContent += "<td >" + v.levelName + "(" + v.gradePoint + ")" + "</td>";
-									} 
-									// else if (v.inputStatusCode == "03") { // 暂存成绩显示已经无效，且会造成错误，先注释掉
+									//} else if (v.inputStatusCode == "03") { // 暂存成绩显示已经无效，且会造成错误，先注释掉
 									// 	// 利用页面中存在的隐藏选择器，获取等级对应的绩点和名称
 									// 	$("#djcj_complete").val(v.levlePoint); // the typo is from URP endpoint
 									// 	$("#bfcj_complete").val(v.levlePoint);
@@ -763,8 +762,7 @@
 									// tContent += "<td >" + v.englishCourseName + "</td>";
 									if (v.inputStatusCode == "05") {
 										tContent += "<td >" + v.levelName + "(" + v.gradePoint + ")" + "</td>";
-									}
-									// else if (v.inputStatusCode == "03") { 
+									//} else if (v.inputStatusCode == "03") { 
 									// 	// 利用页面中存在的隐藏选择器，获取等级对应的绩点和名称
 									// 	$("#djcj_complete").val(v.levlePoint); // the typo is from URP endpoint
 									// 	$("#bfcj_complete").val(v.levlePoint);
