@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-成绩详情导航
-// @version      1.6.0
+// @version      1.6.1
 // @description  在全部学期成绩查询页面添加前往分项成绩和当前学期成绩明细的入口。
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -443,10 +443,14 @@
 								var curYear = curDate.getUTCFullYear();
 								var curMonth = curDate.getUTCMonth() + 1;
 
-								if(curMonth >= 5 && curMonth <= 11){ // 暑假
-									var curTeachingTermNum = (curYear - 1).toString() + "-" + curYear.toString() + "-2-1"; // 上年度春季学期
+								if(curMonth >= 5 && curMonth <= 11){ // 暑假，上年度春季学期
+									var curTeachingTermNum = (curYear - 1).toString() + "-" + curYear.toString() + "-2-1"; // 如2024年7月，对应2023-2024-2-1
 								}else{ // 寒假
-									var curTeachingTermNum = curYear.toString() + "-" + (curYear + 1).toString() + "-1-1"; // 本年度秋季学期
+									if(curMonth >=6){ // 本年度秋季学期
+										var curTeachingTermNum = curYear.toString() + "-" + (curYear + 1).toString() + "-1-1"; // 未翻年，如2024年12月，对应2024-2025-1-1
+									}else{
+										var curTeachingTermNum = (curYear - 1).toString() + "-" + curYear.toString() + "-1-1"; // 已翻年，如2024年1月，对应2023-2024-1-1
+									}
 								}
 							}
 
