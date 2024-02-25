@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-教材查询
-// @version      2.0.0
+// @version      2.0.1
 // @description  查询已选教材的详细信息
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -175,7 +175,7 @@ function fillTable(data,isScroll,page,pageSize){
         $("#page-content-template > div > div > h4:nth-child(6)").remove()
         $("#page-content-template > div > div > div.profile-user-info.profile-user-info-striped.self").remove()
         $("#page-content-template > div > div > div > table > thead > tr > th:nth-child(13)").text("选用理由")
-
+        $("span[title='点击修改教师用书数量']").remove() // 删除修改教师用书数量的按钮，防止通过学生账号操作此项造成混乱
         // get tr elements' length of tbody
         let trLen = $('#page-content-template > div > div > div > table > tbody > tr').length
         // if length is 0, then return
