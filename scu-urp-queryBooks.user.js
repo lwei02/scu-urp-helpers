@@ -139,6 +139,7 @@ function fillTable(data,isScroll,page,pageSize){
                 tableId++
             }
             $('#form_tbody').html(newHTML)
+            $("#page_div_jc").show()
         }
 
         function queryLi(){
