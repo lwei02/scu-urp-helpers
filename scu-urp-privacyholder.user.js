@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-隐私保护插件
-// @version      3.0.2
+// @version      4.0.0
 // @description  对头像、姓名等进行直接替换，便于截图
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -9,6 +9,10 @@
 // @grant 		 GM_setValue
 // @grant 		 GM_getValue
 // @grant 		 GM_log
+// @grant 		 GM_getResourceText
+// @grant 		 GM_addStyle
+// @require      https://cdnjs.cloudflare.com/ajax/libs/layui/2.9.7/layui.min.js
+// @resource     layui_css https://cdnjs.cloudflare.com/ajax/libs/layui/2.9.7/css/layui.min.css
 // ==/UserScript==
 
 (function() {
@@ -23,6 +27,9 @@
     // 7. p1_avatarMode: 1-2 [1*: 默认头像， 2: 自定义头像]
     // 8. p1_defAvtGender: 0, 1 [0: 男性头像，1: 女性头像，仅在p1_avatarMode为1时有效，此处默认值通过检测头像的onerror属性来判断]
     // 9. p1_cusAvt: "base64" [仅在p1_avatarMode为2时有效]
+
+    const layui_css = GM_getResourceText("layui_css");
+    GM_addStyle(layui_css);
 
     // 默认配置
     if(GM_getValue("profileIndex", void 0) === void 0) {
