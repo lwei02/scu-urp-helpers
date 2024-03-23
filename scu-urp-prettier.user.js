@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-字体替换
-// @version      2.0.0
-// @description  让教务系统的字体样式更好看一些
+// @version      2.0.1
+// @description  教务系统美化，字体替换
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
 // @match        *://202.115.47.141/*
@@ -12,6 +12,8 @@
 
 (function() {
     'use strict';
+
+    document.querySelector(".navbar-brand > .span_bbzx").innerText = '四川大学教学管理与服务平台'; // 统一标题，部分页面仍使用“四川大学教务管理系统”
     
     var styleTg = document.createElement('style');
     styleTg.type = 'text/css';

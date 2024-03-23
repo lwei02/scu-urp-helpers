@@ -9,6 +9,7 @@
 
 ## [字体替换脚本](./scu-urp-prettier.user.js)
 * 将教务系统默认字体替换为更好看的字体
+* 统一新系统的页面标题，避免割裂感
 
 ## [标准GPA脚本](./scu-urp-showMoreGPA.user.js)
 * 在主页将必修GPA替换成标准GPA
