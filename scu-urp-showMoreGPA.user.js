@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-标准GPA
-// @version      1.0.2
+// @version      1.0.3
 // @description  Temporarily brought Standard GPA back.
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -14,7 +14,7 @@
 (function() {
     'use strict';
 
-    if(!window.location.pathname in ['/', '/index', '/index.htm', '/index.html']) {
+    if(window.location.pathname == '/' || window.location.pathname.indexOf('/index') == 0) {
         return;
     }
 
