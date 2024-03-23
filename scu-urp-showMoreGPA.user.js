@@ -1,23 +1,23 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-标准GPA
-// @version      1.0.1
+// @version      1.0.2
 // @description  Temporarily brought Standard GPA back.
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
 // @match        *://202.115.47.141/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=scu.edu.cn
-// @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js
-// @require      https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js
+// @require      http://zhjw.scu.edu.cn/js/jQuery/jquery-3.4.1.min.js
+// @require      http://zhjw.scu.edu.cn/assets/bootstrap/3.2.0/js/bootstrap.min.js
 // ==/UserScript==
 
 
 (function() {
     'use strict';
 
-    if(!window.location.pathname.indexOf('index') in ['/', '/index', '/index.htm', '/index.html']) {
+    if(!window.location.pathname in ['/', '/index', '/index.htm', '/index.html']) {
         return;
     }
-    
+
     var mainStdGpa = 0.0;
     var altStdGpa = 0.0;
     var allStdGpa = 0.0;
@@ -162,5 +162,5 @@
         });
     };
 
-    
+
 }());
