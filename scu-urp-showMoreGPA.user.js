@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-标准GPA
-// @version      1.0.0
+// @version      1.0.1
 // @description  Temporarily brought Standard GPA back.
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -18,10 +18,14 @@
         return;
     }
     
-    var stdGpa = 0.0;
-    var ccGpa = 0.0;
+    var mainStdGpa = 0.0;
+    var altStdGpa = 0.0;
+    var allStdGpa = 0.0;
+    var mainCcGpa = 0.0;
+    var allCcGpa = 0.0;
+    var altCcGpa = 0.0;
 
-    
+    var isAlt = false;
 
     // redefine the function which queries academic info
     const oldLearnInfo = learnInfo;
@@ -44,22 +48,69 @@
                 credentials: 'same-origin'
             });
             fetchReq.then(res => res.json()).then(json => {
-                var creditSum = 0.0;
-                var gpa = 0.0;
+                var _mainStdGpa = 0.0;
+                var _allStdGpa = 0.0;
+                var _mainCcGpa = 0.0;
+                var _allCcGpa = 0.0;
+                var _altStdGpa = 0.0;
+                var _altCcGpa = 0.0;
+
+                var mainStdCreditSum = 0.0;
+                var allStdCreditSum = 0.0;
+                var mainCcCreditSum = 0.0;
+                var allCcCreditSum = 0.0;
+                var altStdCreditSum = 0.0;
+                var altCcCreditSum = 0.0;
                 for(let i of json['lnList']){
                     for(let j of i['cjList']){
-                        creditSum += parseFloat(j['credit']);
+                        if(i == json['lnList'][0]){ // 主修，此时计入主修标准学分、全部标准学分
+                            mainStdCreditSum += parseFloat(j['credit']);
+                            allStdCreditSum += parseFloat(j['credit']);
+                            if(j['courseAttributeName'] == '必修'){ // 主修必修，此时额外计入主修必修学分、全部必修学分
+                                mainCcCreditSum += parseFloat(j['credit']);
+                                allCcCreditSum += parseFloat(j['credit']);
+                            }
+                        }else{ // 辅修，此时计入全部标准学分、辅修标准学分
+                            allStdCreditSum += parseFloat(j['credit']);
+                            altStdCreditSum += parseFloat(j['credit']);
+                            if(j['courseAttributeName'] == '必修'){ // 辅修必修，此时额外计入全部必修学分、辅修必修学分
+                                allCcCreditSum += parseFloat(j['credit']);
+                                altCcCreditSum += parseFloat(j['credit']);
+                            }
+                        }
                     }
                 }
                 for(let i of json['lnList']){
                     for(let j of i['cjList']){
-                        gpa += parseFloat(j['credit']) / creditSum * j['gradePointScore'];
+                        if(i == json['lnList'][0]){ // 主修
+                            if(j['courseAttributeName'] == '必修'){ // 主修必修
+                                _mainCcGpa += parseFloat(j['credit']) * j['gradePointScore'] / mainCcCreditSum;
+                                _allCcGpa += parseFloat(j['credit']) * j['gradePointScore'] / allCcCreditSum;
+                            }
+                            _mainStdGpa += parseFloat(j['credit']) * j['gradePointScore'] / mainStdCreditSum;
+                        }else{ // 辅修
+                            if(j['courseAttributeName'] == '必修'){ // 辅修必修
+                                _altCcGpa += parseFloat(j['credit']) * j['gradePointScore'] / altCcCreditSum;
+                                _allCcGpa += parseFloat(j['credit']) * j['gradePointScore'] / allCcCreditSum;
+                            }
+                            _altStdGpa += parseFloat(j['credit']) * j['gradePointScore'] / altStdCreditSum;
+                        }
+                        _allStdGpa += parseFloat(j['credit']) * j['gradePointScore'] / allStdCreditSum;
                     }
                 }
-                ccGpa = parseFloat(document.getElementById('gpa').innerText);
-                stdGpa = gpa;
-                document.getElementById('gpa').innerText = gpa.toFixed(2);
+                mainStdGpa = _mainStdGpa;
+                allStdGpa = _allStdGpa;
+                mainCcGpa = _mainCcGpa;
+                allCcGpa = _allCcGpa;
+                altStdGpa = _altStdGpa;
+                altCcGpa = _altCcGpa;
+                document.getElementById('gpa').innerText = mainStdGpa.toFixed(2);
                 document.getElementById('gpaName').innerText = '主修标准GPA算法';
+                if(json['lnList'].length > 1){
+                    isAlt = true;
+                }else{
+                    isAlt = false;
+                }
             });
         });
     };
@@ -68,8 +119,12 @@
     const oldShowMoreGPA = showMoreGPA;
     showMoreGPA = function() {
         const dat = [
-            ['主修标准GPA算法', stdGpa.toFixed(2), null],
-            ['主修必修GPA算法', ccGpa, null]
+            ['主修标准GPA算法', mainStdGpa.toFixed(2), null],
+            ['主修必修GPA算法', mainCcGpa.toFixed(2), null],
+            ['辅修标准GPA算法', isAlt? altStdGpa.toFixed(2) : "没有辅修成绩！", null],
+            ['辅修必修GPA算法', isAlt? altCcGpa.toFixed(2) : "没有辅修成绩！", null],
+            ['全部标准GPA算法', allStdGpa.toFixed(2), null],
+            ['全部必修GPA算法', allCcGpa.toFixed(2), null]
         ];
         var cont = "<div class='modal-header no-padding'>\
                 <div class='table-header'>\
