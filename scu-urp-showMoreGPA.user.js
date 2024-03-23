@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-标准GPA
-// @version      1.0.3
+// @version      1.0.4
 // @description  Temporarily brought Standard GPA back.
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
@@ -14,8 +14,11 @@
 (function() {
     'use strict';
 
-    if(window.location.pathname == '/' || window.location.pathname.indexOf('/index') == 0) {
-        return;
+    try{
+        var _discard = learnInfo;
+        _discard = showMoreGPA;
+    }catch(e){
+        return; // if the functions are not defined, return
     }
 
     var mainStdGpa = 0.0;
@@ -27,7 +30,6 @@
 
     var isAlt = false;
 
-    // redefine the function which queries academic info
     const oldLearnInfo = learnInfo;
     learnInfo = function(flag) {
         oldLearnInfo(flag);
