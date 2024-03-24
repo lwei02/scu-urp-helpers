@@ -63,8 +63,11 @@
                 var allCcCreditSum = 0.0;
                 var altStdCreditSum = 0.0;
                 var altCcCreditSum = 0.0;
+
+                var courseCount = 0;
                 for(let i of json['lnList']){
                     for(let j of i['cjList']){
+                        courseCount += 1;
                         if(i == json['lnList'][0]){ // 主修，此时计入主修标准学分、全部标准学分
                             mainStdCreditSum += parseFloat(j['credit']);
                             allStdCreditSum += parseFloat(j['credit']);
@@ -108,6 +111,7 @@
                 altCcGpa = _altCcGpa;
                 document.getElementById('gpa').innerText = mainStdGpa.toFixed(2);
                 document.getElementById('gpaName').innerText = '主修标准GPA算法';
+                document.getElementById('courseNum').innerText = courseCount; // 教务系统会把补考、重修、复修等情况再计算一次，数据不正确，改成正确的数据
                 if(json['lnList'].length > 1){
                     isAlt = true;
                 }else{
