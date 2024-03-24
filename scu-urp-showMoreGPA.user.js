@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         四川大学本科教务系统-标准GPA
-// @version      1.0.4
-// @description  Temporarily brought Standard GPA back.
+// @version      1.0.5
+// @description  Temporarily brought Standard GPA back. Also fix the academic menu's jump.
 // @author       moelwei02
 // @match        *://zhjw.scu.edu.cn/*
 // @match        *://202.115.47.141/*
@@ -163,6 +163,50 @@
             $(this).css('opacity', '0.5');
         });
     };
+
+    // redefine the gotoMenu function, to catch the error
+    const oldGotoMenu = gotoMenu;
+    gotoMenu = function (menu) {
+        try{
+            oldGotoMenu(menu);
+        }catch(e){
+            if(e instanceof TypeError){
+                layer.msg('找不到跳转目标');
+            }
+        }
+    };
+
+    // fix the academic menu's jump
+    var menu = document.querySelectorAll("li[onclick='toSelect(this);'] > a")
+    var lnks = document.querySelectorAll("div.widget-main > div.infobox.studyinfo-width[onclick]")
+    for(let i of lnks){
+        if(i.innerText.trim().indexOf("已修读课程门数") != -1){
+            for(let j of menu){
+                if(j.innerText.trim() === '指导性教学计划'){
+                    i.onclick = () => {gotoMenu(j.parentNode.id)}
+                }
+            }
+        }
+        if(i.innerText.trim().indexOf("尚不及格课程门数") != -1){
+            for(let j of menu){
+                if(j.innerText.trim() === '不及格成绩'){
+                    i.onclick = () => {gotoMenu(j.parentNode.id)}
+                }
+            }
+        }
+        if(i.children[0].children[0].className === 'ace-icon fa fa-flask'){
+            for(let j of menu){
+                if(j.innerText.trim() === '方案完成情况'){
+                    i.onclick = () => {gotoMenu(j.parentNode.id)}
+                }
+            }
+        }
+    }
+    for(let j of menu){
+        if(j.innerText.trim() === '本学期课表'){
+            document.getElementById("xy_kcms").onclick = () => {gotoMenu(j.parentNode.id)}
+        }
+    }
 
 
 }());
